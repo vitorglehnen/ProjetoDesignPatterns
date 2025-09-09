@@ -1,0 +1,135 @@
+unit Editor.Canvas;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Generics.Collections,
+  Vcl.Graphics,
+  Model.Shapes; // Precisa conhecer a unit das formas
+
+type
+  // Declaração antecipada (forward declaration) para que TCanvasMemento a conheça
+  TDrawingCanvas = class;
+
+  // --- PADRÃO MEMENTO: O objeto que guarda o estado ---
+  // Um "Memento" é um objeto que armazena um snapshot do estado de outro objeto.
+  // Neste caso, ele guarda uma cópia da lista de formas em um ponto no tempo.
+  TCanvasMemento = class
+  private
+    // Esta lista contém CLONES das formas, garantindo que o estado salvo
+    // não seja alterado se o desenho original mudar.
+    FShapesState: TObjectList<TShape>;
+  public
+    constructor Create(ShapesToSave: TObjectList<TShape>);
+    destructor Destroy; override;
+    function GetShapesState: TObjectList<TShape>;
+  end;
+
+
+  // --- O "Originator": O objeto cujo estado queremos salvar ---
+  // Esta é a classe principal que gerencia nosso desenho.
+  TDrawingCanvas = class
+  private
+    FShapes: TObjectList<TShape>; // A lista "ao vivo" de formas no desenho
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure AddShape(AShape: TShape);
+    procedure DrawAll(ACanvas: TCanvas);
+
+    // Métodos que implementam o padrão Memento
+    function CreateMemento: TCanvasMemento;
+    procedure RestoreFromMemento(AMemento: TCanvasMemento);
+  end;
+
+implementation
+
+{ TCanvasMemento }
+
+constructor TCanvasMemento.Create(ShapesToSave: TObjectList<TShape>);
+var
+  Shape: TShape;
+begin
+  inherited Create;
+  FShapesState := TObjectList<TShape>.Create;
+
+  // Ponto CRÍTICO: Não apenas copiamos a lista, nós CLONAMOS cada objeto nela.
+  // Isso garante que o Memento tenha uma cópia independente do estado.
+  for Shape in ShapesToSave do
+  begin
+    FShapesState.Add(Shape.Clone); // Usando o padrão Prototype!
+  end;
+end;
+
+destructor TCanvasMemento.Destroy;
+begin
+  FShapesState.Free; // Libera a lista e todos os objetos clonados nela
+  inherited Destroy;
+end;
+
+function TCanvasMemento.GetShapesState: TObjectList<TShape>;
+begin
+  Result := FShapesState;
+end;
+
+{ TDrawingCanvas }
+
+constructor TDrawingCanvas.Create;
+begin
+  inherited;
+  // A lista de TObjectList (com True no construtor) se torna "dona" dos objetos,
+  // ou seja, ela os destruirá quando forem removidos ou quando a lista for destruída.
+  FShapes := TObjectList<TShape>.Create(True);
+end;
+
+destructor TDrawingCanvas.Destroy;
+begin
+  FShapes.Free;
+  inherited Destroy;
+end;
+
+procedure TDrawingCanvas.AddShape(AShape: TShape);
+begin
+  // Adiciona a forma à lista. A lista agora é responsável por destruir esta forma.
+  FShapes.Add(AShape);
+end;
+
+procedure TDrawingCanvas.DrawAll(ACanvas: TCanvas);
+var
+  Shape: TShape;
+begin
+  // Simplesmente percorre a lista e manda cada forma se desenhar.
+  for Shape in FShapes do
+  begin
+    Shape.Draw(ACanvas);
+  end;
+end;
+
+function TDrawingCanvas.CreateMemento: TCanvasMemento;
+begin
+  // Cria um novo "ponto de salvamento" com o estado atual da lista de formas.
+  Result := TCanvasMemento.Create(Self.FShapes);
+end;
+
+procedure TDrawingCanvas.RestoreFromMemento(AMemento: TCanvasMemento);
+var
+  Shape: TShape;
+  SavedShapes: TObjectList<TShape>;
+begin
+  // Limpa a lista atual de formas (destruindo os objetos existentes).
+  FShapes.Clear;
+
+  // Pega a lista de formas salvas do Memento.
+  SavedShapes := AMemento.GetShapesState;
+
+  // Popula a lista atual com CLONES das formas salvas no Memento.
+  // É importante clonar novamente para que o canvas tenha suas próprias cópias.
+  for Shape in SavedShapes do
+  begin
+    FShapes.Add(Shape.Clone);
+  end;
+end;
+
+end.

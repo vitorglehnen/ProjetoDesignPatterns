@@ -1,0 +1,74 @@
+unit Patterns.Commands;
+
+interface
+
+uses
+  System.SysUtils,
+  Unit.Editor.Canvas, // Precisa conhecer a "engine" do editor
+  Unit.Model.Shapes;   // Precisa conhecer as formas
+
+type
+  // --- PADRÃO COMMAND: A interface que define uma ação ---
+  // Qualquer ação no nosso sistema (Adicionar, Mover, Deletar)
+  // poderia implementar esta interface.
+  ICommand = interface
+    ['{B93D211F-4B17-4820-998C-084F93B8640C}'] // GUID gerado com Ctrl+Shift+G
+    procedure Execute;   // Executa a ação
+    procedure UnExecute; // Desfaz a ação
+  end;
+
+  // --- Implementação concreta do Comando de Adicionar Forma ---
+  TAddShapeCommand = class(TInterfacedObject, ICommand)
+  private
+    FDrawingCanvas: TDrawingCanvas;
+    FShapeToAdd: TShape;
+    FMemento: TCanvasMemento; // O comando guarda o Memento para poder desfazer!
+  public
+    constructor Create(ADrawingCanvas: TDrawingCanvas; AShapeToAdd: TShape);
+    destructor Destroy; override;
+
+    // Métodos da interface ICommand
+    procedure Execute;
+    procedure UnExecute;
+  end;
+
+implementation
+
+{ TAddShapeCommand }
+
+constructor TAddShapeCommand.Create(ADrawingCanvas: TDrawingCanvas;
+  AShapeToAdd: TShape);
+begin
+  FDrawingCanvas := ADrawingCanvas;
+  FShapeToAdd := AShapeToAdd;
+  FMemento := nil; // Boa prática inicializar como nil
+end;
+
+destructor TAddShapeCommand.Destroy;
+begin
+  // O comando é responsável por liberar o Memento que ele criou.
+  FMemento.Free;
+  inherited;
+end;
+
+procedure TAddShapeCommand.Execute;
+begin
+  // Passo 1: Antes de executar a ação, salvamos o estado atual do canvas.
+  // O Memento é a nossa "foto" do antes.
+  FMemento := FDrawingCanvas.CreateMemento;
+
+  // Passo 2: Agora sim, executamos a ação.
+  FDrawingCanvas.AddShape(FShapeToAdd);
+end;
+
+procedure TAddShapeCommand.UnExecute;
+begin
+  // Para desfazer, simplesmente restauramos o canvas para o estado
+  // que salvamos no Memento antes da execução.
+  if Assigned(FMemento) then
+  begin
+    FDrawingCanvas.RestoreFromMemento(FMemento);
+  end;
+end;
+
+end.

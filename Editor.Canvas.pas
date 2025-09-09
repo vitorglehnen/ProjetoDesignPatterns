@@ -1,0 +1,118 @@
+unit Editor.Canvas;
+
+interface
+
+uses
+  System.SysUtils,
+  System.Generics.Collections,
+  Vcl.Graphics,
+  Model.Shapes;
+
+type
+  TDrawingCanvas = class;
+
+  { Um "Memento" é um objeto que armazena um snapshot do estado de outro objeto.
+    Neste caso, ele guarda uma cópia da lista de formas em um ponto no tempo. }
+  TCanvasMemento = class
+  private
+    FShapesState: TObjectList<TShape>;
+  public
+    constructor Create(ShapesToSave: TObjectList<TShape>);
+    destructor Destroy; override;
+    function GetShapesState: TObjectList<TShape>;
+  end;
+
+  // Classe principal que gerencia nosso desenho.
+  TDrawingCanvas = class
+  private
+    FShapes: TObjectList<TShape>; // A lista ao vivo de formas no desenho
+  public
+    constructor Create;
+    destructor Destroy; override;
+
+    procedure AddShape(AShape: TShape);
+    procedure DrawAll(ACanvas: TCanvas);
+
+    function CreateMemento: TCanvasMemento;
+    procedure RestoreFromMemento(AMemento: TCanvasMemento);
+  end;
+
+implementation
+
+{ TCanvasMemento }
+
+constructor TCanvasMemento.Create(ShapesToSave: TObjectList<TShape>);
+var
+  Shape: TShape;
+begin
+  inherited Create;
+  FShapesState := TObjectList<TShape>.Create;
+
+  for Shape in ShapesToSave do
+  begin
+    FShapesState.Add(Shape.Clone);
+  end;
+end;
+
+destructor TCanvasMemento.Destroy;
+begin
+  FShapesState.Free;
+  inherited Destroy;
+end;
+
+function TCanvasMemento.GetShapesState: TObjectList<TShape>;
+begin
+  Result := FShapesState;
+end;
+
+{ TDrawingCanvas }
+
+constructor TDrawingCanvas.Create;
+begin
+  inherited;
+
+  FShapes := TObjectList<TShape>.Create(True);
+end;
+
+destructor TDrawingCanvas.Destroy;
+begin
+  FShapes.Free;
+  inherited Destroy;
+end;
+
+procedure TDrawingCanvas.AddShape(AShape: TShape);
+begin
+  FShapes.Add(AShape);
+end;
+
+procedure TDrawingCanvas.DrawAll(ACanvas: TCanvas);
+var
+  Shape: TShape;
+begin
+  for Shape in FShapes do
+  begin
+    Shape.Draw(ACanvas);
+  end;
+end;
+
+function TDrawingCanvas.CreateMemento: TCanvasMemento;
+begin
+  Result := TCanvasMemento.Create(Self.FShapes);
+end;
+
+procedure TDrawingCanvas.RestoreFromMemento(AMemento: TCanvasMemento);
+var
+  Shape: TShape;
+  SavedShapes: TObjectList<TShape>;
+begin
+  FShapes.Clear;
+
+  SavedShapes := AMemento.GetShapesState;
+
+  for Shape in SavedShapes do
+  begin
+    FShapes.Add(Shape.Clone);
+  end;
+end;
+
+end.

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2025/09/09 12:58:22.742,=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2025/09/09 12:58:31.582,=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2025/09/09 12:58:50.147,C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Model.Shapes.pas=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2025/09/09 13:00:59.119,=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2025/09/09 13:01:10.029,C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Editor.Canvas.pas=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2025/09/09 13:02:08.002,=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2025/09/09 13:02:17.502,C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Patterns.Commands.pas=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit2.pas</Transaction>
+    <Transaction>2025/09/09 13:04:32.432,C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Main.pas=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2025/09/09 13:04:32.432,C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Main.dfm=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2025/09/09 13:09:31.947,C:\Users\vitor\Documents\Embarcadero\Studio\Projects\ProjetoPatterns.dproj=C:\Users\vitor\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
+  </Transactions>
+</BorlandProject>
